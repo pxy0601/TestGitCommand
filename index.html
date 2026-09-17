@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>护眼刷题 · 辅助记忆</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            background-color: #e9f0e6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px;
+        }
+
+        /* ========== 整体布局 ========== */
+        .app-container {
+            width: 1300px;
+            max-width: 100%;
+            height: 85vh;
+            min-height: 500px;
+            max-height: 900px;
+            background-color: #f8fbf5;
+            border-radius: 32px;
+            box-shadow: 0 12px 30px rgba(80, 70, 50, 0.08), 0 4px 10px rgba(0, 0, 0, 0.02);
+            display: flex;
+            padding: 20px 24px;
+            gap: 24px;
+            border: 1px solid #d8e2d0;
+            overflow: hidden;
+        }
+
+        /* ========== 左侧主区域 ========== */
+        .main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            min-height: 0;
+            background-color: #ffffffd9;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: inset 0 2px 8px rgba(160, 140, 120, 0.04), 0 2px 6px rgba(0, 0, 0, 0.02);
+            border: 1px solid #e2ebdb;
+            overflow: hidden;
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+
+        .app-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #4a6442;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .app-title span {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: #8ba382;
+            background-color: #e8f0e4;
+            padding: 2px 12px;
+            border-radius: 30px;
+        }
+
+        /* ========== 答题区域（带滚动） ========== */
+        .quiz-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-color: #f9fdf7;
+            border-radius: 20px;
+            padding: 28px 32px;
+            border: 1px solid #dde9d7;
+            box-shadow: 0 2px 12px rgba(160, 140, 120, 0.04);
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        /* 中间可滚动的内容区域 */
+        .quiz-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow-y: auto;
+            padding-right: 8px;
+            margin-bottom: 16px;
+            scrollbar-width: thin;
+            scrollbar-color: #b7cfb1 #e2ebdb;
+        }
+
+        .quiz-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .quiz-content::-webkit-scrollbar-track {
+            background: #e2ebdb;
+            border-radius: 10px;
+            margin: 4px 0;
+        }
+
+        .quiz-content::-webkit-scrollbar-thumb {
+            background-color: #b7cfb1;
+            border-radius: 10px;
+            border: 1px solid #d0ddca;
+        }
+
+        .quiz-content::-webkit-scrollbar-thumb:hover {
+            background-color: #9bb892;
+        }
+
+        /* 题目部分 */
+        .question-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .question-index {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #6f8c6a;
+            background-color: #e2eedb;
+            padding: 4px 14px;
+            border-radius: 40px;
+            letter-spacing: 0.3px;
+            flex-shrink: 0;
+            margin-top: 4px;
+        }
+
+        .question-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2e1c;
+            line-height: 1.5;
+            flex: 1;
+            word-break: break-word;
+            min-width: 0;
+            /* 保留换行和空格 */
+            white-space: pre-wrap;
+        }
+
+        /* 解析部分 */
+        .answer-box {
+            background-color: #eef6ea;
+            border-left: 6px solid #b1cfaa;
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin: 8px 0 12px;
+            font-size: 1.15rem;
+            color: #2a3e26;
+            line-height: 1.7;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 12px rgba(150, 180, 140, 0.08);
+            word-break: break-word;
+            flex-shrink: 0;
+            /* 保留换行和空格 */
+            white-space: pre-wrap;
+        }
+
+        .answer-box.hidden {
+            background-color: #f2f6ef;
+            border-left-color: #d0ddca;
+            color: #a0b09a;
+            font-style: italic;
+            user-select: none;
+            box-shadow: none;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* ========== 底部导航按钮 ========== */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+
+        .nav-left, .nav-right {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background-color: #b7cfb1;
+            border: none;
+            border-radius: 40px;
+            padding: 10px 22px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #2b3a2a;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(110, 130, 100, 0.15);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 0.3px;
+            border: 1px solid #c2d6bb;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        .btn:hover {
+            background-color: #a8c2a1;
+            box-shadow: 0 4px 10px rgba(90, 110, 80, 0.2);
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1.5px solid #b7cfb1;
+            box-shadow: none;
+            color: #3b5535;
+            padding: 10px 18px;
+        }
+
+        .btn-outline:hover {
+            background-color: #e2eedb;
+            border-color: #9bb892;
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* ========== 右侧题目列表栏 ========== */
+        .sidebar {
+            width: 250px;
+            background-color: #f2f8ee;
+            border-radius: 24px;
+            padding: 18px 6px 18px 16px;
+            border: 1px solid #d4e2cc;
+            box-shadow: 0 6px 16px rgba(100, 120, 90, 0.06);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-left: 10px;
+            margin-bottom: 12px;
+            border-bottom: 1px dashed #c2d6ba;
+            padding-bottom: 12px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header h3 {
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #678b5e;
+            margin: 0;
+        }
+
+        .count-badge {
+            font-size: 0.7rem;
+            background-color: #ffffffb3;
+            padding: 2px 8px;
+            border-radius: 30px;
+            color: #557a4c;
+            border: 1px solid #cbdcc2;
+            margin-left: 6px;
+        }
+
+        .question-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding-right: 12px;
+            padding-left: 2px;
+            min-height: 0;
+            scrollbar-width: thin;
+            scrollbar-color: #b7cfb1 #e2ebdb;
+        }
+
+        .question-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .question-list::-webkit-scrollbar-track {
+            background: #e2ebdb;
+            border-radius: 10px;
+            margin: 4px 0;
+        }
+
+        .question-list::-webkit-scrollbar-thumb {
+            background-color: #b7cfb1;
+            border-radius: 10px;
+            border: 1px solid #d0ddca;
+        }
+
+        .question-list::-webkit-scrollbar-thumb:hover {
+            background-color: #9bb892;
+        }
+
+        .list-item {
+            padding: 10px 14px;
+            border-radius: 40px;
+            background-color: #ffffffb3;
+            border: 1px solid #e0ecda;
+            color: #3d5538;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-size: 0.9rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-shrink: 0;
+            text-align: center;
+            user-select: none;
+        }
+
+        .list-item:hover {
+            background-color: #d9e8d3;
+            border-color: #b1cfaa;
+        }
+
+        .list-item:active {
+            transform: scale(0.98);
+        }
+
+        .list-item.active {
+            background-color: #b7cfb1;
+            border-color: #8db383;
+            color: #1e2e1b;
+            font-weight: 600;
+            box-shadow: 0 4px 8px rgba(120, 150, 110, 0.2);
+        }
+
+        /* 空状态 / 加载状态 */
+        .empty-state {
+            color: #9aaf93;
+            text-align: center;
+            padding: 32px 10px;
+            font-style: italic;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            border: 3px solid #d4e2cc;
+            border-top-color: #8db383;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 12px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* 提示条 */
+        .toast {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-10px);
+            background-color: rgba(60, 80, 55, 0.92);
+            color: #f0f7ec;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            z-index: 2000;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s, transform 0.25s;
+            max-width: 90vw;
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ========== 移动端适配 ========== */
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+                align-items: stretch;
+            }
+
+            .app-container {
+                width: 100%;
+                height: 100vh;
+                height: 100dvh;
+                max-height: none;
+                border-radius: 0;
+                padding: 0;
+                gap: 0;
+                flex-direction: column;
+                box-shadow: none;
+                border: none;
+            }
+
+            .main-area {
+                border-radius: 0;
+                padding: 16px;
+                box-shadow: none;
+                border: none;
+                background-color: #f8fbf5;
+                flex: 1;
+                min-height: 0;
+            }
+
+            .action-bar {
+                margin-bottom: 12px;
+            }
+
+            .app-title {
+                font-size: 1.05rem;
+            }
+
+            .app-title span {
+                font-size: 0.7rem;
+                padding: 2px 8px;
+            }
+
+            .quiz-area {
+                padding: 18px 16px;
+                border-radius: 16px;
+            }
+
+            .question-text {
+                font-size: 1.25rem;
+                line-height: 1.55;
+            }
+
+            .question-index {
+                font-size: 0.85rem;
+                padding: 3px 12px;
+            }
+
+            .answer-box {
+                font-size: 1rem;
+                padding: 16px 18px;
+                line-height: 1.7;
+            }
+
+            .btn {
+                padding: 9px 16px;
+                font-size: 0.88rem;
+            }
+
+            .btn-outline {
+                padding: 9px 14px;
+            }
+
+            .nav-buttons {
+                gap: 8px;
+            }
+
+            .nav-left, .nav-right {
+                gap: 8px;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 140px;
+                border-radius: 0;
+                padding: 10px 0 10px 12px;
+                border: none;
+                border-top: 1px solid #d4e2cc;
+                background-color: #f2f8ee;
+                box-shadow: 0 -4px 12px rgba(100, 120, 90, 0.06);
+                flex-direction: column;
+            }
+
+            .sidebar-header {
+                margin-bottom: 8px;
+                padding-bottom: 8px;
+                padding-left: 4px;
+            }
+
+            .sidebar-header h3 {
+                font-size: 0.8rem;
+            }
+
+            .question-list {
+                flex-direction: row;
+                overflow-x: auto;
+                overflow-y: hidden;
+                gap: 8px;
+                padding-right: 12px;
+                padding-bottom: 6px;
+                padding-left: 0;
+                scrollbar-width: thin;
+                scrollbar-color: #b7cfb1 #e2ebdb;
+            }
+
+            .question-list::-webkit-scrollbar {
+                height: 5px;
+            }
+
+            .question-list::-webkit-scrollbar-track {
+                background: #e2ebdb;
+                border-radius: 10px;
+            }
+
+            .question-list::-webkit-scrollbar-thumb {
+                background-color: #b7cfb1;
+                border-radius: 10px;
+            }
+
+            .list-item {
+                flex-shrink: 0;
+                width: auto;
+                min-width: 60px;
+                max-width: 140px;
+                padding: 8px 14px;
+                font-size: 0.82rem;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+            }
+
+            .quiz-content {
+                padding-right: 4px;
+                margin-bottom: 12px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .question-text {
+                font-size: 1.1rem;
+            }
+
+            .answer-box {
+                font-size: 0.92rem;
+                padding: 14px 16px;
+            }
+
+            .btn {
+                padding: 8px 12px;
+                font-size: 0.82rem;
+            }
+
+            .nav-left, .nav-right {
+                gap: 6px;
+            }
+
+            .main-area {
+                padding: 12px;
+            }
+
+            .quiz-area {
+                padding: 14px 12px;
+            }
+
+            .sidebar {
+                max-height: 120px;
+                padding: 8px 0 8px 10px;
+            }
+
+            .list-item {
+                padding: 6px 10px;
+                font-size: 0.78rem;
+                min-width: 50px;
+            }
+        }
+
+        @media (max-height: 500px) and (orientation: landscape) {
+            .app-container {
+                flex-direction: row;
+            }
+
+            .sidebar {
+                width: 200px;
+                max-height: none;
+                border-top: none;
+                border-left: 1px solid #d4e2cc;
+                padding: 12px 4px 12px 12px;
+            }
+
+            .question-list {
+                flex-direction: column;
+                overflow-x: hidden;
+                overflow-y: auto;
+                padding-right: 8px;
+                padding-bottom: 0;
+            }
+
+            .list-item {
+                width: auto;
+                max-width: none;
+                min-width: 0;
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+
+            .sidebar-header {
+                padding-left: 6px;
+            }
+
+            .main-area {
+                padding: 12px;
+            }
+
+            .quiz-area {
+                padding: 14px 18px;
+            }
+
+            .question-text {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <!-- 左侧主区域 -->
+    <div class="main-area">
+        <div class="action-bar">
+            <div class="app-title">
+                📖 辅助记忆
+                <span id="totalCountBadge">0 题</span>
+            </div>
+        </div>
+
+        <div class="quiz-area">
+            <!-- 可滚动内容区 -->
+            <div class="quiz-content" id="quizContent">
+                <div class="question-header">
+                    <span class="question-index" id="questionIndexDisplay">#--</span>
+                    <div class="question-text" id="questionTextDisplay">加载中...</div>
+                </div>
+
+                <div class="answer-box hidden" id="answerBox">
+                    <span id="answerContent">点击“查看解析”显示答案</span>
+                </div>
+            </div>
+
+            <!-- 底部固定按钮 -->
+            <div class="nav-buttons">
+                <div class="nav-left">
+                    <button class="btn btn-outline" id="showAnswerBtn">🔍 查看解析</button>
+                </div>
+                <div class="nav-right">
+                    <button class="btn btn-outline" id="prevBtn">← 上一题</button>
+                    <button class="btn btn-outline" id="nextBtn">下一题 →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右侧题目列表栏 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h3>📋 题目列表</h3>
+        </div>
+        <div class="question-list" id="questionListContainer">
+            <div class="empty-state">
+                <div class="loading-spinner"></div>
+                <div>正在加载题目...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    (function () {
+        // ========== 应用状态 ==========
+        let questions = [];
+        let currentIndex = 0;
+        let isAnswerVisible = false;
+
+        // ========== DOM ==========
+        const quizContent = document.getElementById('quizContent');
+        const questionIndexDisplay = document.getElementById('questionIndexDisplay');
+        const questionTextDisplay = document.getElementById('questionTextDisplay');
+        const answerBox = document.getElementById('answerBox');
+        const answerContent = document.getElementById('answerContent');
+        const showAnswerBtn = document.getElementById('showAnswerBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const questionListContainer = document.getElementById('questionListContainer');
+        const totalCountBadge = document.getElementById('totalCountBadge');
+        const toastEl = document.getElementById('toast');
+
+        // ========== 工具函数 ==========
+        function showToast(msg, duration = 2000) {
+            toastEl.textContent = msg;
+            toastEl.classList.add('show');
+            clearTimeout(toastEl._timer);
+            toastEl._timer = setTimeout(() => {
+                toastEl.classList.remove('show');
+            }, duration);
+        }
+
+        function escapeHtml(str) {
+            return String(str == null ? '' : str).replace(/[&<>"']/g, (m) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[m]));
+        }
+
+        function getCurrentQuestion() {
+            if (!questions.length) return null;
+            return questions[currentIndex] || null;
+        }
+
+        // ========== 渲染 ==========
+        function renderCurrentQuestion() {
+            const q = getCurrentQuestion();
+            if (!q) {
+                questionIndexDisplay.textContent = '#--';
+                questionTextDisplay.textContent = questions.length === 0
+                    ? '暂无题目，请检查 data.json 文件是否存在且格式正确'
+                    : '题目加载异常';
+                answerContent.textContent = '无解析';
+                answerBox.classList.add('hidden');
+                isAnswerVisible = false;
+                showAnswerBtn.textContent = '🔍 查看解析';
+                quizContent.scrollTop = 0;
+                return;
+            }
+
+            questionIndexDisplay.textContent = `#${q.id}`;
+            // 使用 textContent 赋值，结合 CSS white-space: pre-wrap，保留换行符
+            questionTextDisplay.textContent = q.question;
+
+            if (isAnswerVisible) {
+                // 同样使用 textContent 保留换行
+                answerContent.textContent = q.answer || '（暂无解析）';
+                answerBox.classList.remove('hidden');
+                showAnswerBtn.textContent = '🙈 隐藏解析';
+            } else {
+                answerContent.textContent = '点击“查看解析”显示答案';
+                answerBox.classList.add('hidden');
+                showAnswerBtn.textContent = '🔍 查看解析';
+            }
+
+            quizContent.scrollTop = 0;
+            updateActiveListItem();
+            updateNavButtons();
+        }
+
+        function updateNavButtons() {
+            if (questions.length <= 1) {
+                prevBtn.disabled = true;
+                nextBtn.disabled = true;
+                return;
+            }
+            prevBtn.disabled = currentIndex <= 0;
+            nextBtn.disabled = currentIndex >= questions.length - 1;
+        }
+
+        function updateActiveListItem() {
+            const items = questionListContainer.querySelectorAll('.list-item');
+            items.forEach(item => {
+                const idx = parseInt(item.dataset.index, 10);
+                if (idx === currentIndex) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        function renderQuestionList() {
+            totalCountBadge.textContent = `${questions.length} 题`;
+
+            if (!questions.length) {
+                questionListContainer.innerHTML = '<div class="empty-state">暂无题目</div>';
+                return;
+            }
+
+            let html = '';
+            questions.forEach((q, idx) => {
+                const activeClass = idx === currentIndex ? 'active' : '';
+                // 列表预览时把换行符替换为空格，避免显示错乱
+                const previewText = String(q.question).replace(/\s+/g, ' ');
+                const displayText = previewText.length > 14 ? previewText.slice(0, 14) + '…' : previewText;
+                html += `<div class="list-item ${activeClass}" data-index="${idx}" title="${escapeHtml(previewText)}">#${q.id} ${escapeHtml(displayText)}</div>`;
+            });
+            questionListContainer.innerHTML = html;
+
+            questionListContainer.querySelectorAll('.list-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const idx = parseInt(item.dataset.index, 10);
+                    if (!isNaN(idx) && idx !== currentIndex) {
+                        currentIndex = idx;
+                        isAnswerVisible = false;
+                        renderCurrentQuestion();
+                        renderQuestionList();
+                    }
+                });
+            });
+
+            const activeItem = questionListContainer.querySelector('.list-item.active');
+            if (activeItem) {
+                activeItem.scrollIntoView({block: 'nearest', inline: 'nearest', behavior: 'smooth'});
+            }
+        }
+
+        // ========== 操作逻辑 ==========
+        function switchQuestion(delta) {
+            if (questions.length === 0) return;
+            const newIndex = currentIndex + delta;
+            if (newIndex < 0 || newIndex >= questions.length) return;
+            currentIndex = newIndex;
+            isAnswerVisible = false;
+            renderCurrentQuestion();
+            renderQuestionList();
+        }
+
+        function toggleAnswer() {
+            const q = getCurrentQuestion();
+            if (!q) return;
+            isAnswerVisible = !isAnswerVisible;
+            renderCurrentQuestion();
+        }
+
+        // ========== 键盘事件 ==========
+        function handleKeyDown(e) {
+            const tag = (e.target.tagName || '').toLowerCase();
+            if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                switchQuestion(-1);
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                switchQuestion(1);
+            }
+        }
+
+        // ========== 加载 data.json ==========
+        async function loadData() {
+            try {
+                const response = await fetch('data.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                const data = await response.json();
+
+                if (!Array.isArray(data)) {
+                    throw new Error('data.json 格式错误：根节点必须是数组');
+                }
+
+                questions = data.map((item, index) => ({
+                    id: item.id != null ? item.id : index + 1,
+                    question: item.question != null ? String(item.question) : '（无题目内容）',
+                    answer: item.answer != null ? String(item.answer) : '（暂无解析）'
+                })).sort((a, b) => a.id - b.id);
+
+                if (questions.length === 0) {
+                    questionListContainer.innerHTML = '<div class="empty-state">data.json 中暂无题目</div>';
+                    totalCountBadge.textContent = '0 题';
+                    renderCurrentQuestion();
+                    return;
+                }
+
+                currentIndex = 0;
+                isAnswerVisible = false;
+                renderCurrentQuestion();
+                renderQuestionList();
+            } catch (err) {
+                console.error('加载 data.json 失败:', err);
+                questionTextDisplay.textContent = '无法加载 data.json，请确认文件是否存在且格式正确';
+                questionIndexDisplay.textContent = '#--';
+                answerContent.textContent = '无法加载题目数据';
+                answerBox.classList.add('hidden');
+                questionListContainer.innerHTML = `
+            <div class="empty-state">
+              ⚠️ 加载失败<br>
+              <span style="font-size:0.8rem;">${escapeHtml(err.message)}</span>
+            </div>`;
+                totalCountBadge.textContent = '0 题';
+                showToast('加载 data.json 失败，请检查文件', 3000);
+            }
+        }
+
+        // ========== 初始化 ==========
+        function init() {
+            showAnswerBtn.addEventListener('click', toggleAnswer);
+            prevBtn.addEventListener('click', () => switchQuestion(-1));
+            nextBtn.addEventListener('click', () => switchQuestion(1));
+            window.addEventListener('keydown', handleKeyDown);
+
+            loadData();
+        }
+
+        init();
+    })();
+</script>
+</body>
+</html>
