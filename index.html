@@ -166,7 +166,6 @@
             flex: 1;
             word-break: break-word;
             min-width: 0;
-            /* 保留换行和空格 */
             white-space: pre-wrap;
         }
 
@@ -184,7 +183,6 @@
             box-shadow: 0 4px 12px rgba(150, 180, 140, 0.08);
             word-break: break-word;
             flex-shrink: 0;
-            /* 保留换行和空格 */
             white-space: pre-wrap;
         }
 
@@ -269,7 +267,7 @@
 
         /* ========== 右侧题目列表栏 ========== */
         .sidebar {
-            width: 250px;
+            width: 260px;
             background-color: #f2f8ee;
             border-radius: 24px;
             padding: 18px 6px 18px 16px;
@@ -290,6 +288,8 @@
             border-bottom: 1px dashed #c2d6ba;
             padding-bottom: 12px;
             flex-shrink: 0;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         .sidebar-header h3 {
@@ -309,6 +309,43 @@
             color: #557a4c;
             border: 1px solid #cbdcc2;
             margin-left: 6px;
+        }
+
+        /* 筛选开关 */
+        .filter-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            color: #4f6b48;
+            cursor: pointer;
+            user-select: none;
+            padding: 4px 10px;
+            border-radius: 30px;
+            background-color: #e6f0e1;
+            border: 1px solid #d0e0c8;
+            transition: all 0.15s;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .filter-toggle:hover {
+            background-color: #d9e8d3;
+            border-color: #b1cfaa;
+        }
+
+        .filter-toggle.active {
+            background-color: #f5e3a4;
+            border-color: #e5cd6a;
+            color: #6b5410;
+        }
+
+        .filter-toggle input {
+            display: none;
+        }
+
+        .filter-icon {
+            font-size: 0.9rem;
         }
 
         .question-list {
@@ -345,7 +382,7 @@
         }
 
         .list-item {
-            padding: 10px 14px;
+            padding: 10px 12px;
             border-radius: 40px;
             background-color: #ffffffb3;
             border: 1px solid #e0ecda;
@@ -355,12 +392,26 @@
             transition: all 0.15s;
             font-size: 0.9rem;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-            white-space: nowrap;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+            user-select: none;
+        }
+
+        .list-item .list-text {
             overflow: hidden;
             text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+        }
+
+        .list-item .marker-icon {
+            color: #d4a017;
+            font-size: 1rem;
             flex-shrink: 0;
-            text-align: center;
-            user-select: none;
+            font-weight: 700;
         }
 
         .list-item:hover {
@@ -380,6 +431,11 @@
             box-shadow: 0 4px 8px rgba(120, 150, 110, 0.2);
         }
 
+        .list-item.marked:not(.active) {
+            background-color: #fdf7e3;
+            border-color: #ecdc9a;
+        }
+
         /* 空状态 / 加载状态 */
         .empty-state {
             color: #9aaf93;
@@ -388,6 +444,15 @@
             font-style: italic;
             font-size: 0.9rem;
             line-height: 1.8;
+        }
+
+        .filter-empty {
+            color: #9aaf93;
+            text-align: center;
+            padding: 32px 10px;
+            font-style: italic;
+            font-size: 0.88rem;
+            line-height: 1.7;
         }
 
         .loading-spinner {
@@ -513,10 +578,11 @@
                 gap: 8px;
             }
 
+            /* 移动端右侧题目栏变为底部横向滚动条 */
             .sidebar {
                 width: 100%;
                 height: auto;
-                max-height: 140px;
+                max-height: 150px;
                 border-radius: 0;
                 padding: 10px 0 10px 12px;
                 border: none;
@@ -536,6 +602,12 @@
                 font-size: 0.8rem;
             }
 
+            .filter-toggle {
+                font-size: 0.72rem;
+                padding: 3px 8px;
+            }
+
+            /* 移动端题目列表横向滚动 */
             .question-list {
                 flex-direction: row;
                 overflow-x: auto;
@@ -566,9 +638,12 @@
                 flex-shrink: 0;
                 width: auto;
                 min-width: 60px;
-                max-width: 140px;
-                padding: 8px 14px;
+                max-width: 150px;
+                padding: 8px 12px;
                 font-size: 0.82rem;
+            }
+
+            .list-item .list-text {
                 text-overflow: ellipsis;
                 overflow: hidden;
                 white-space: nowrap;
@@ -608,7 +683,7 @@
             }
 
             .sidebar {
-                max-height: 120px;
+                max-height: 130px;
                 padding: 8px 0 8px 10px;
             }
 
@@ -625,7 +700,7 @@
             }
 
             .sidebar {
-                width: 200px;
+                width: 220px;
                 max-height: none;
                 border-top: none;
                 border-left: 1px solid #d4e2cc;
@@ -703,10 +778,15 @@
         </div>
     </div>
 
-    <!-- 右侧题目列表栏 -->
+    <!-- 右侧题目列表栏（带筛选） -->
     <div class="sidebar">
         <div class="sidebar-header">
-            <h3>📋 题目列表</h3>
+            <h3>📋 题目 <span class="count-badge" id="totalCount">0</span></h3>
+            <label class="filter-toggle" id="filterToggle">
+                <input type="checkbox" id="filterMarkedCheckbox">
+                <span class="filter-icon">⭐</span>
+                <span>只看标记</span>
+            </label>
         </div>
         <div class="question-list" id="questionListContainer">
             <div class="empty-state">
@@ -722,9 +802,10 @@
 <script>
     (function () {
         // ========== 应用状态 ==========
-        let questions = [];
-        let currentIndex = 0;
+        let questions = [];           // 全部题目（来自 data.json）
+        let currentIndex = 0;         // 当前题目在 questions 中的索引
         let isAnswerVisible = false;
+        let filterMarked = false;     // 筛选状态：是否只看标记
 
         // ========== DOM ==========
         const quizContent = document.getElementById('quizContent');
@@ -737,6 +818,9 @@
         const nextBtn = document.getElementById('nextBtn');
         const questionListContainer = document.getElementById('questionListContainer');
         const totalCountBadge = document.getElementById('totalCountBadge');
+        const totalCountSpan = document.getElementById('totalCount');
+        const filterToggle = document.getElementById('filterToggle');
+        const filterMarkedCheckbox = document.getElementById('filterMarkedCheckbox');
         const toastEl = document.getElementById('toast');
 
         // ========== 工具函数 ==========
@@ -760,6 +844,14 @@
             return questions[currentIndex] || null;
         }
 
+        // 当前可见的题目列表（受筛选影响）
+        function getVisibleQuestions() {
+            if (filterMarked) {
+                return questions.filter(q => q.marked);
+            }
+            return questions;
+        }
+
         // ========== 渲染 ==========
         function renderCurrentQuestion() {
             const q = getCurrentQuestion();
@@ -767,7 +859,7 @@
                 questionIndexDisplay.textContent = '#--';
                 questionTextDisplay.textContent = questions.length === 0
                     ? '暂无题目，请检查 data.json 文件是否存在且格式正确'
-                    : '题目加载异常';
+                    : '当前筛选条件下没有题目';
                 answerContent.textContent = '无解析';
                 answerBox.classList.add('hidden');
                 isAnswerVisible = false;
@@ -777,11 +869,9 @@
             }
 
             questionIndexDisplay.textContent = `#${q.id}`;
-            // 使用 textContent 赋值，结合 CSS white-space: pre-wrap，保留换行符
             questionTextDisplay.textContent = q.question;
 
             if (isAnswerVisible) {
-                // 同样使用 textContent 保留换行
                 answerContent.textContent = q.answer || '（暂无解析）';
                 answerBox.classList.remove('hidden');
                 showAnswerBtn.textContent = '🙈 隐藏解析';
@@ -809,8 +899,9 @@
         function updateActiveListItem() {
             const items = questionListContainer.querySelectorAll('.list-item');
             items.forEach(item => {
-                const idx = parseInt(item.dataset.index, 10);
-                if (idx === currentIndex) {
+                const id = parseInt(item.dataset.id, 10);
+                const current = getCurrentQuestion();
+                if (current && id === current.id) {
                     item.classList.add('active');
                 } else {
                     item.classList.remove('active');
@@ -818,28 +909,44 @@
             });
         }
 
+        // 渲染右侧列表（带筛选）
         function renderQuestionList() {
+            const visible = getVisibleQuestions();
+            totalCountSpan.textContent = questions.length;
             totalCountBadge.textContent = `${questions.length} 题`;
 
-            if (!questions.length) {
+            if (questions.length === 0) {
                 questionListContainer.innerHTML = '<div class="empty-state">暂无题目</div>';
                 return;
             }
 
+            if (visible.length === 0) {
+                questionListContainer.innerHTML = `<div class="filter-empty">⭐ 没有标记的题目<br><span style="font-size:0.8rem;">请在 data.json 中为题目设置 marked: true</span></div>`;
+                return;
+            }
+
             let html = '';
-            questions.forEach((q, idx) => {
-                const activeClass = idx === currentIndex ? 'active' : '';
-                // 列表预览时把换行符替换为空格，避免显示错乱
+            visible.forEach((q) => {
+                const globalIndex = questions.findIndex(item => item.id === q.id);
+                const current = getCurrentQuestion();
+                const isActive = current && q.id === current.id;
+                const activeClass = isActive ? 'active' : '';
+                const markedClass = q.marked ? 'marked' : '';
                 const previewText = String(q.question).replace(/\s+/g, ' ');
-                const displayText = previewText.length > 14 ? previewText.slice(0, 14) + '…' : previewText;
-                html += `<div class="list-item ${activeClass}" data-index="${idx}" title="${escapeHtml(previewText)}">#${q.id} ${escapeHtml(displayText)}</div>`;
+                const displayText = previewText.length > 15 ? previewText.slice(0, 15) + '…' : previewText;
+                const markerHtml = q.marked ? '<span class="marker-icon">★</span>' : '';
+                html += `
+            <div class="list-item ${activeClass} ${markedClass}" data-index="${globalIndex}" data-id="${q.id}" title="${escapeHtml(previewText)}">
+              <span class="list-text">#${q.id} ${escapeHtml(displayText)}</span>
+              ${markerHtml}
+            </div>`;
             });
             questionListContainer.innerHTML = html;
 
             questionListContainer.querySelectorAll('.list-item').forEach(item => {
                 item.addEventListener('click', () => {
                     const idx = parseInt(item.dataset.index, 10);
-                    if (!isNaN(idx) && idx !== currentIndex) {
+                    if (!isNaN(idx) && idx !== currentIndex && idx >= 0 && idx < questions.length) {
                         currentIndex = idx;
                         isAnswerVisible = false;
                         renderCurrentQuestion();
@@ -856,13 +963,26 @@
 
         // ========== 操作逻辑 ==========
         function switchQuestion(delta) {
-            if (questions.length === 0) return;
-            const newIndex = currentIndex + delta;
-            if (newIndex < 0 || newIndex >= questions.length) return;
-            currentIndex = newIndex;
-            isAnswerVisible = false;
-            renderCurrentQuestion();
-            renderQuestionList();
+            const visible = getVisibleQuestions();
+            if (visible.length === 0) return;
+
+            const current = getCurrentQuestion();
+            if (!current) return;
+
+            const visibleIndex = visible.findIndex(q => q.id === current.id);
+            if (visibleIndex === -1) return;
+
+            const newVisibleIndex = visibleIndex + delta;
+            if (newVisibleIndex < 0 || newVisibleIndex >= visible.length) return;
+
+            const targetId = visible[newVisibleIndex].id;
+            const newGlobalIndex = questions.findIndex(q => q.id === targetId);
+            if (newGlobalIndex !== -1) {
+                currentIndex = newGlobalIndex;
+                isAnswerVisible = false;
+                renderCurrentQuestion();
+                renderQuestionList();
+            }
         }
 
         function toggleAnswer() {
@@ -870,6 +990,23 @@
             if (!q) return;
             isAnswerVisible = !isAnswerVisible;
             renderCurrentQuestion();
+        }
+
+        // ---------- 筛选切换 ----------
+        function toggleFilter() {
+            filterMarked = filterMarkedCheckbox.checked;
+            filterToggle.classList.toggle('active', filterMarked);
+            // 筛选后，若当前题目不在可见列表中，自动跳到第一个可见题目
+            if (filterMarked) {
+                const current = getCurrentQuestion();
+                if (current && !current.marked) {
+                    const firstMarked = questions.findIndex(q => q.marked);
+                    if (firstMarked !== -1) currentIndex = firstMarked;
+                }
+            }
+            isAnswerVisible = false;
+            renderCurrentQuestion();
+            renderQuestionList();
         }
 
         // ========== 键盘事件 ==========
@@ -899,14 +1036,17 @@
                     throw new Error('data.json 格式错误：根节点必须是数组');
                 }
 
+                // 规范化数据：确保 id、question、answer、marked 字段存在
                 questions = data.map((item, index) => ({
                     id: item.id != null ? item.id : index + 1,
                     question: item.question != null ? String(item.question) : '（无题目内容）',
-                    answer: item.answer != null ? String(item.answer) : '（暂无解析）'
+                    answer: item.answer != null ? String(item.answer) : '（暂无解析）',
+                    marked: item.marked === true   // 只有显式 true 才视为标记
                 })).sort((a, b) => a.id - b.id);
 
                 if (questions.length === 0) {
                     questionListContainer.innerHTML = '<div class="empty-state">data.json 中暂无题目</div>';
+                    totalCountSpan.textContent = '0';
                     totalCountBadge.textContent = '0 题';
                     renderCurrentQuestion();
                     return;
@@ -927,6 +1067,7 @@
               ⚠️ 加载失败<br>
               <span style="font-size:0.8rem;">${escapeHtml(err.message)}</span>
             </div>`;
+                totalCountSpan.textContent = '0';
                 totalCountBadge.textContent = '0 题';
                 showToast('加载 data.json 失败，请检查文件', 3000);
             }
@@ -937,6 +1078,7 @@
             showAnswerBtn.addEventListener('click', toggleAnswer);
             prevBtn.addEventListener('click', () => switchQuestion(-1));
             nextBtn.addEventListener('click', () => switchQuestion(1));
+            filterMarkedCheckbox.addEventListener('change', toggleFilter);
             window.addEventListener('keydown', handleKeyDown);
 
             loadData();
